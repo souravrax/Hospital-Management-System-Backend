@@ -1,4 +1,4 @@
-function patientHandler(req, res, db) {
+function patientInsertionHandler(req, res, db) {
   const {
     name,
     pContactNumber,
@@ -20,7 +20,6 @@ function patientHandler(req, res, db) {
     notes,
     imageURL
   } = req.body;
-
 
   db("patient_info")
     .insert({
@@ -54,6 +53,54 @@ function patientHandler(req, res, db) {
     });
 }
 
+const patientRetriever = (res, db) => {
+  db.select("*")
+    .from("patient_info")
+    .then(info => {
+      if (info.length === 0) {
+        res.status.send("Sorry no patients found on the database");
+      }
+    })
+    .catch("Sorry something went wrong");
+};
+
+const patientRetrieveByTheirNames = (res, db, name) => {
+  db.select("*")
+    .from("login")
+    .where("patient_name", "=", name)
+    .then(patients => {
+      patients.length === 1 ? res.json(patients) : res.json(patients[0]);
+      if (patients.length === 0) {
+        res
+          .status(404)
+          .send(`Sorry patient with ${name} is not in the database`);
+      }
+    })
+    .catch(err => {
+      res.send(500).send(`Sorry something went wrong`);
+    });
+};
+
+const patientRetrieveByDoctorAppointed = (res, db, doctor_name) => {
+  db.select("*")
+    .from("login")
+    .where("doctor_appointed", "=", doctor_name)
+    .then(patients => {
+      patients.length === 1 ? res.json(patients) : res.json(patients[0]);
+      if (patients.length === 0) {
+        res
+          .status(404)
+          .send(`Sorry patient with ${name} is not in the database`);
+      }
+    })
+    .catch(err => {
+      res.send(500).send(`Sorry something went wrong`);
+    });
+};
+
 module.exports = {
-  patientHandler: patientHandler
+  patientInsertionHandler: patientInsertionHandler,
+  patientRetriever: patientRetriever,
+  patientRetrieveByDoctorAppointed: patientRetrieveByDoctorAppointed,
+  patientRetrieveByTheirNames: patientRetrieveByTheirNames
 };

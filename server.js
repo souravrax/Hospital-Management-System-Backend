@@ -4,7 +4,12 @@ const bcrypt = require("bcrypt-nodejs");
 
 const login = require("./controllers/loginHandler").loginHandler;
 const register = require("./controllers/registrationHandler");
-const patient = require("./controllers/patientHandler").patientHandler;
+const {
+  patientInsertionHandler,
+  patientRetriever,
+  patientRetrieveByDoctorAppointed,
+  patientRetrieveByTheirNames
+} = require("./controllers/patientHandler");
 const updateDetails = require("./controllers/detailsUpdater");
 
 const pg = require("knex")({
@@ -26,11 +31,25 @@ app.use(express.json()); //Using middleware to preprocess the received data for 
 app.post("/login", (req, res) => {
   login(req, res, pg, bcrypt);
 });
+
 app.post("/register", (req, res) => {
   register.registrationHandler(req, res, pg, bcrypt);
 });
-app.post("./patient", (req, res) => {
-  patient(req, res, pg);
+
+app.post("/insert_patient", (req, res) => {
+  patientInsertionHandler(req, res, pg);
+});
+
+app.post("/get_patients", (req, res) => {
+  patientRetriever(res, pg);
+});
+
+app.post("/get_patient_by_name", (req, res) => {
+  patientRetrieveByTheirNames(res, pg, req.body.name);
+});
+
+app.post("/get_patient_by_doctor_appointed", (req, res) => {
+  patientRetrieveByDoctorAppointed(res, pg, req.body.doctorName);
 });
 
 app.put("/patient_details", (req, res) => {
