@@ -1,15 +1,15 @@
 const loginHandler = (req, res, pg, bcrypt) => {
-  const { username, password } = req.body;
+  const { username, password, position } = req.body;
 
   if (!password || !username) {
     res.status(404).send("Incorrect form submission");
   }
-  pg.select("pass_hash", "user_id", "email")
+  pg.select("pass_hash", "user_id", "email", "position")
     .from("login")
     .where("username", "=", username)
     .then(data => {
       const isValid = bcrypt.compareSync(password, data[0].pass_hash);
-      if (isValid) {
+      if (isValid && data[0].position === position) {
         return pg
           .select("*")
           .from("login")
