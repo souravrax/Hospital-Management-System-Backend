@@ -2,11 +2,9 @@ function patientInsertionHandler(req, res, db) {
   const {
     name,
     pContactNumber,
-    sContactNumber,
     bloodGroup,
     married,
     partnerName,
-    childrensNames,
     dob,
     sex,
     pEmail,
@@ -17,19 +15,18 @@ function patientInsertionHandler(req, res, db) {
     country,
     doctorAppointed,
     criticalInformation,
-    notes,
-    imageURL
+    medicineList,
+    timingOfMedicine,
+    discharged
   } = req.body;
 
   db("patient_info")
     .insert({
       patient_name: name,
       primary_contact_no: pContactNumber,
-      secondary_contact_number: sContactNumber,
       blood_group: bloodGroup,
-      maritial_status: married ? "Married" : "Unmarried",
+      maritial_status: married,
       partner_name: partnerName,
-      childrens_name: childrensNames,
       dob: dob,
       sex: sex,
       primary_email: pEmail,
@@ -40,8 +37,9 @@ function patientInsertionHandler(req, res, db) {
       country: country,
       doctor_appointed: doctorAppointed,
       critical_information: criticalInformation,
-      notes: notes,
-      image_url: imageURL
+      medicine_list : medicineList,
+      timing_of_medicine : timingOfMedicine,
+      discharged : discharged
     })
     .then(() => {
       console.log("New patient details inserted successfully");
@@ -53,12 +51,15 @@ function patientInsertionHandler(req, res, db) {
     });
 }
 
-const patientRetriever = (res, db) => {
+const patientRetrieveAll = (res, db) => {
   db.select("*")
-    .from("patient_info")
+    .from("patient_info").where("discharged" , "!=" , "true")
     .then(info => {
       if (info.length === 0) {
-        res.status.send("Sorry no patients found on the database");
+        res.status(404).send("Sorry no patients found on the database");
+      }
+      else{
+        res.json(info);
       }
     })
     .catch("Sorry something went wrong");
@@ -100,7 +101,7 @@ const patientRetrieveByDoctorAppointed = (res, db, doctor_name) => {
 
 module.exports = {
   patientInsertionHandler: patientInsertionHandler,
-  patientRetriever: patientRetriever,
+  patientRetriever: patientRetrieveAll,
   patientRetrieveByDoctorAppointed: patientRetrieveByDoctorAppointed,
   patientRetrieveByTheirNames: patientRetrieveByTheirNames
 };

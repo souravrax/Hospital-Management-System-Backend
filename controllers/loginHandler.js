@@ -1,6 +1,5 @@
 const loginHandler = (req, res, pg, bcrypt) => {
-  const { username, password, position } = req.body;
-
+  const { username, password } = req.body;
   if (!password || !username) {
     res.status(404).send("Incorrect form submission");
   }
@@ -9,9 +8,9 @@ const loginHandler = (req, res, pg, bcrypt) => {
     .where("username", "=", username)
     .then(data => {
       const isValid = bcrypt.compareSync(password, data[0].pass_hash);
-      if (isValid && data[0].position === position) {
+      if (isValid) {
         return pg
-          .select("*")
+          .select("user_id", "username", "name", "position")
           .from("login")
           .where("user_id", "=", data[0].user_id)
           .then(response => {
@@ -21,11 +20,11 @@ const loginHandler = (req, res, pg, bcrypt) => {
             res.status(500).send("Unable to get the data from the server");
           });
       } else {
-        res.status(400).send("Wrong Credentials");
+        res.status(404).send("Wrong Credentials");
       }
     })
     .catch(err => {
-      res.status(400).send("Wrong Credentials");
+      res.status(400).send("Sorry something went wrong");
     });
 };
 

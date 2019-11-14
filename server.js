@@ -11,6 +11,7 @@ const {
   patientRetrieveByTheirNames
 } = require("./controllers/patientHandler");
 const updateDetails = require("./controllers/detailsUpdater");
+const {allRetriever} = require('./controllers/allRetrieveHandler');
 
 const pg = require("knex")({
   client: "pg",
@@ -40,7 +41,7 @@ app.post("/insert_patient", (req, res) => {
   patientInsertionHandler(req, res, pg);
 });
 
-app.post("/get_patients", (req, res) => {
+app.get("/get_patients", (req, res) => {
   patientRetriever(res, pg);
 });
 
@@ -59,6 +60,13 @@ app.put("/patient_details", (req, res) => {
 app.put("/user_details", (req, res) => {
   updateDetails.userDetailUpdater(req, res);
 });
+
+
+app.get('/retrieve', (req, res)=>{
+  allRetriever(res, pg, req.body.position);
+})
+
+
 
 app.listen(PORT, () => {
   console.log(`Server is running at PORT ${PORT}`);
